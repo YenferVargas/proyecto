@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de Perú con Etiquetas y Puntos</title>
+    <style>
+        /* Estilos CSS ... */
+        #map {
+            width: 70%;
+            height: 500px;
+            float: left;
+        }
+        .label {
+            position: absolute;
+            font-weight: bold;
+            background-color: white;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .marker {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            margin-left: -5px;
+            margin-top: -5px;
+        }
+        .marker.selected {
+            background-color: green;
+        }
+        .region-info {
+            width: 30%;
+            height: 500px;
+            float: right;
+            padding: 20px;
+            text-align: center;
+        }
+        .region-info img {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <div id="map"></div>
+    <div class="region-info">
+        <h2 id="region-title">Título de la Región</h2>
+        <img id="region-image" src="" alt="Imagen de la Región">
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var selectedMarker = null;
+
+        var regions = [
+            { name: 'Lima', lat: -12.0464, lon: -77.0428, image: 'lima.jpg', title: 'Lima' },
+            { name: 'Arequipa', lat: -16.4090, lon: -71.5375, image: 'arequipa.jpg', title: 'Arequipa' },
+            // ... otras regiones ...
+        ];
+
+        var map = L.map('map').setView([-9.1900, -75.0152], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        regions.forEach(function(region) {
+            var marker = L.marker([region.lat, region.lon]).addTo(map);
+            marker.on('click', function() {
+                // Restaurar el marcador previamente seleccionado a su estado original
+                if (selectedMarker) {
+                    selectedMarker.setIcon(L.divIcon({ className: 'marker', iconSize: [10, 10], iconAnchor: [5, 5] }));
+                }
+
+                // Establecer el nuevo marcador como seleccionado
+                selectedMarker = marker;
+                selectedMarker.setIcon(L.divIcon({ className: 'marker selected', iconSize: [10, 10], iconAnchor: [5, 5] }));
+
+                document.getElementById('region-title').textContent = region.title;
+                document.getElementById('region-image').src = region.image;
+            });
+
+            var label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = region.name;
+            label.style.top = marker._icon.offsetTop - 20 + 'px';
+            label.style.left = marker._icon.offsetLeft + 'px';
+            document.getElementById('map').appendChild(label);
+        });
+
+        // Configurar el marcador de Lima como seleccionado por defecto
+        selectedMarker = L.marker([regions[0].lat, regions[0].lon]).addTo(map);
+        selectedMarker.setIcon(L.divIcon({ className: 'marker selected', iconSize: [10, 10], iconAnchor: [5, 5] }));
+        document.getElementById('region-title').textContent = regions[0].title;
+        document.getElementById('region-image').src = regions[0].image;
+    </script>
+</body>
+</html>
